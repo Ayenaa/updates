@@ -10,7 +10,8 @@
     <!-- Font Awesome for better icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --primary: #4361ee;
@@ -73,15 +74,15 @@
             max-width: 380px;
         }
 
-            .card-btn i {
-                font-size: 2rem;
-                margin-bottom: 0.5rem;
-            }
+        .card-btn i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
 
-            .card-btn:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            }
+        .card-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
 
         .loan-btn {
             background-color: var(--primary);
@@ -110,10 +111,10 @@
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-            .loan-section.active {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .loan-section.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
         .section-header {
             display: flex;
@@ -167,7 +168,7 @@
             background-color: rgba(0, 0, 0, 0.02);
         }
 
-        .table > :not(caption) > * > * {
+        .table> :not(caption)>*>* {
             padding: 0.2rem 0.7rem;
         }
 
@@ -176,13 +177,13 @@
             color: white;
         }
 
-            thead th {
-                font-weight: 600;
-                border: none !important;
-                text-transform: uppercase;
-                font-size: 0.85rem;
-                letter-spacing: 1px;
-            }
+        thead th {
+            font-weight: 600;
+            border: none !important;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
 
         tbody td {
             font-weight: 400;
@@ -228,11 +229,11 @@
             transition: all 0.3s;
         }
 
-            .btn-pagination:hover {
-                background-color: var(--secondary);
-                color: white;
-                border-color: var(--secondary);
-            }
+        .btn-pagination:hover {
+            background-color: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
 
         #showingEntries {
             color: var(--primary);
@@ -300,10 +301,10 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
-            .stats-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
 
         .stats-icon {
             width: 60px;
@@ -315,10 +316,10 @@
             margin-bottom: 1rem;
         }
 
-            .stats-icon i {
-                font-size: 1.8rem;
-                color: white;
-            }
+        .stats-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
 
         .stats-number {
             font-size: 1.8rem;
@@ -365,32 +366,31 @@
         }
 
         /* Sample table data styling */
-        .loan-amount, .payment-amount {
+        .loan-amount,
+        .payment-amount {
             font-weight: 600;
         }
 
         /* Responsive adjustments */
-        .media (max-width: 768px) {
-            .card-btn
+        @media (max-width: 768px) {
+            .card-btn {
+                margin-bottom: 1rem;
+            }
 
-        {
-            margin-bottom: 1rem;
-        }
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
 
-        .section-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
+            .header-title {
+                font-size: 1.8rem;
+            }
 
-        .header-title {
-            font-size: 1.8rem;
-        }
-
-        .table-responsive {
-            border: none;
-            box-shadow: none;
-        }
+            .table-responsive {
+                border: none;
+                box-shadow: none;
+            }
 
         }
     </style>
@@ -437,7 +437,7 @@
                     <i class="fas fa-file-invoice"></i> Loan Report
                 </h4>
                 <div class="actions-container">
-                    <button class="btn btn-outline-primary action-btn">
+                    <button class="btn btn-outline-primary action-btn" id="exportLoanBtn">
                         <i class="fas fa-file-export"></i> Export
                     </button>
                     <button class="btn btn-outline-secondary action-btn">
@@ -510,7 +510,7 @@
                     <i class="fas fa-money-bill-wave"></i> Repayment Report
                 </h4>
                 <div class="actions-container">
-                    <button class="btn btn-outline-primary action-btn">
+                    <button class="btn btn-outline-primary action-btn" id="exportLoanBtn">
                         <i class="fas fa-file-export"></i> Export
                     </button>
                     <button class="btn btn-outline-secondary action-btn">
@@ -584,7 +584,7 @@
                     <i class="fas fa-exclamation-circle"></i> Outstanding Report
                 </h4>
                 <div class="actions-container">
-                    <button class="btn btn-outline-primary action-btn">
+                    <button class="btn btn-outline-primary action-btn" id="exportLoanBtn">
                         <i class="fas fa-file-export"></i> Export
                     </button>
                     <button class="btn btn-outline-secondary action-btn">
@@ -616,6 +616,7 @@
                         <thead>
                             <tr>
                                 <th>Sl No.</th>
+                                <th>Loan ID</th>
                                 <th>Loan Type</th>
                                 <th>Total Disbursed</th>
                                 <th>Total Repaid</th>
@@ -705,7 +706,7 @@
             { slNo: 12, loanId: 'L-2025-012', name: 'Patricia Anderson', loanType: 'Vehicle Loan', amount: 38000, appDate: '03/01/2025', status: 'Approved' }
         ];
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             const tableBody = $('#table-body');
             const rowsPerPageSelect = $('#rowsPerPage');
             const searchInput = $('#searchInput');
@@ -785,7 +786,7 @@
                         btn.addClass('active');
                     }
 
-                    btn.on('click', function() {
+                    btn.on('click', function () {
                         currentPage = i;
                         renderTable();
                     });
@@ -795,13 +796,13 @@
             }
 
             // Event listeners
-            rowsPerPageSelect.on('change', function() {
+            rowsPerPageSelect.on('change', function () {
                 rowsPerPage = parseInt(rowsPerPageSelect.val());
                 currentPage = 1;
                 renderTable();
             });
 
-            searchInput.on('input', function() {
+            searchInput.on('input', function () {
                 const searchTerm = searchInput.val().toLowerCase();
                 filteredData = loanReportData.filter(row =>
                     row.loanId.toLowerCase().includes(searchTerm) ||
@@ -815,26 +816,26 @@
                 renderTable();
             });
 
-            firstPageBtn.on('click', function() {
+            firstPageBtn.on('click', function () {
                 currentPage = 1;
                 renderTable();
             });
 
-            prevPageBtn.on('click', function() {
+            prevPageBtn.on('click', function () {
                 if (currentPage > 1) {
                     currentPage--;
                     renderTable();
                 }
             });
 
-            nextPageBtn.on('click', function() {
+            nextPageBtn.on('click', function () {
                 if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
                     currentPage++;
                     renderTable();
                 }
             });
 
-            lastPageBtn.on('click', function() {
+            lastPageBtn.on('click', function () {
                 currentPage = Math.ceil(filteredData.length / rowsPerPage);
                 renderTable();
             });
@@ -844,10 +845,38 @@
         });
 
         // Show loan report by default when page loads
-        $(document).ready(function() {
+        $(document).ready(function () {
             showLoan('loan');
         });
     </script>
+    <script>
+        document.getElementById("exportLoanBtn").addEventListener("click", function () {
+            const rows = [["Sl No.", "Loan ID", "Name", "Loan Type", "Amount", "App. Date", "Status"]];
+            loanReportData.forEach(row => {
+                rows.push([
+                    row.slNo,
+                    row.loanId,
+                    row.name,
+                    row.loanType,
+                    row.amount,
+                    row.appDate,
+                    row.status
+                ]);
+            });
+
+            let csvContent = "data:text/csv;charset=utf-8,"
+                + rows.map(e => e.join(",")).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "loan_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+
 </body>
 
 </html>
