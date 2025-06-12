@@ -1,0 +1,234 @@
+@model List<BankLoanProject.Models.RepaymentReportViewModel>
+@{
+    var role = Context.Session.GetString("Role");
+    Layout = null;
+}
+<div id="repayment" class="report-section table-container">
+    <div class="section-header">
+        <div class="section-info">
+            <h4 class="mb-2">
+                <i class="fas fa-receipt me-2"></i>
+                Repayment Report
+            </h4>
+        </div>
+
+        <div class="export-filter-controls d-flex gap-2 align-items-end flex-wrap">
+            <!-- Export Button -->
+            <button class="btn btn-export" id="btnExport">
+                <i class="fas fa-file-pdf"></i> Export PDF
+            </button>
+
+            <!-- Filter by Status -->
+            <div>
+                <label for="statusFilter" class="form-label"><i class="fas fa-filter me-1"></i>Status</label>
+                <select id="statusFilter" class="form-select">
+                    <option value="">All</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="input-group search-input-group ms-auto">
+                <span class="input-group-text bg-info"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search..." oninput="searchRepayments()">
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper mt-3">
+        <table class="table table-bordered" id="repaymentReportTable">
+            <thead>
+                <tr>
+                    <th>Repayment ID</th>
+                    @if (role == "Admin")
+                    {
+                        <th>Customer ID</th>
+                        <th>Customer Name</th>
+                    }
+                    <th>Loan ID</th>
+                    <th>Amount Due</th>
+                    <th>Due Date</th>
+                    <th>Payment Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody class="report-table-body">
+                @foreach (var report in Model)
+                {
+                    <tr class="report-row">
+                        <td class="text-center">@report.RepaymentId</td>
+                        @if (role == "Admin")
+                        {
+                            <td class="text-center">@report.CustomerId</td>
+                            <td class="text-center"><strong>@report.CustomerName</strong></td>
+                        }
+                        <td class="text-center">@report.LoanId</td>
+                        <td class="text-center"><span class="amount">@report.AmountDue.ToString("C")</span></td>
+                        <td class="text-center">@report.DueDate.ToString("dd/MM/yyyy")</td>
+                        <td class="text-center">@(report.PaymentDate.HasValue ? report.PaymentDate.Value.ToString("dd/MM/yyyy") : "Not Paid")</td>
+                        <td class="text-center">
+                            @{
+                                string statusClass = "";
+                                string statusIcon = "";
+                                switch (report.PaymentStatus?.ToUpper())
+                                {
+                                    case "COMPLETED":
+                                        statusClass = "status-completed";
+                                        statusIcon = "fas fa-check-circle";
+                                        break;
+                                    case "PENDING":
+                                    default:
+                                        statusClass = "status-pending";
+                                        statusIcon = "fas fa-clock";
+                                        break;
+                                }
+                            }
+                            <span class="status-badge @statusClass">
+                                <i class="@statusIcon"></i>@report.PaymentStatus
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-section">
+        <div class="pagination-info" id="repaymentPaginationInfo"></div>
+        <nav aria-label="Repayment report pagination">
+            <ul class="pagination" id="repaymentPaginationContainer"></ul>
+        </nav>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let allRows = [], filteredRows = [];
+
+    $(document).ready(function () {
+        allRows = Array.from(document.querySelectorAll('.report-row'));
+        filteredRows = [...allRows];
+
+        $("#statusFilter").on("change", applyFilters);
+        $("#btnExport").click(() => exportToPDF('repaymentReportTable', 'Repayment_Report'));
+
+        updateTable();
+    });
+
+    function applyFilters() {
+        const selectedStatus = $("#statusFilter").val().toLowerCase();
+        const role = '@role';
+
+        filteredRows = allRows.filter(row => {
+            const cells = row.querySelectorAll('td');
+            let statusText = role === "Admin" ? cells[6].textContent.trim().toLowerCase()
+                                              : cells[4].textContent.trim().toLowerCase();
+
+            return !selectedStatus || statusText.includes(selectedStatus);
+        });
+
+        currentPage = 1;
+        updateTable();
+    }
+
+    function searchRepayments() {
+        const search = $("#searchInput").val().toLowerCase();
+        filteredRows = allRows.filter(row => row.textContent.toLowerCase().includes(search));
+        currentPage = 1;
+        updateTable();
+    }
+
+    function updateTable() {
+        allRows.forEach(row => row.style.display = 'none');
+
+        const totalRows = filteredRows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, totalRows);
+
+        for (let i = start; i < end; i++) {
+            if (filteredRows[i]) filteredRows[i].style.display = '';
+        }
+
+        updatePagination(totalPages, totalRows, start, end);
+    }
+
+    function updatePagination(totalPages, totalRows, start, end) {
+        const container = document.getElementById('repaymentPaginationContainer');
+        const info = document.getElementById('repaymentPaginationInfo');
+        container.innerHTML = "";
+
+        if (totalPages <= 1) {
+            container.appendChild(createPaginationButton('1', 1, false, true));
+        } else {
+            container.appendChild(createPaginationButton('«', 1, currentPage === 1));
+            container.appendChild(createPaginationButton('‹', currentPage - 1, currentPage === 1));
+
+            const maxPages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+            let endPage = Math.min(totalPages, startPage + maxPages - 1);
+            if (endPage - startPage + 1 < maxPages)
+                startPage = Math.max(1, endPage - maxPages + 1);
+
+            for (let i = startPage; i <= endPage; i++) {
+                container.appendChild(createPaginationButton(i, i, false, i === currentPage));
+            }
+
+            container.appendChild(createPaginationButton('›', currentPage + 1, currentPage === totalPages));
+            container.appendChild(createPaginationButton('»', totalPages, currentPage === totalPages));
+        }
+
+        info.innerHTML = totalRows > 0
+            ? `<i class="fas fa-info-circle"></i> Showing ${start + 1} to ${end} of ${totalRows} entries`
+            : `<i class="fas fa-info-circle"></i> No matching records found`;
+    }
+
+    function createPaginationButton(text, page, disabled, active = false) {
+        const li = document.createElement('li');
+        li.className = `page-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.innerHTML = text;
+        if (!disabled) a.onclick = e => { e.preventDefault(); goToPage(page); };
+        li.appendChild(a);
+        return li;
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        updateTable();
+    }
+
+    function exportToPDF(tableId, filename) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16).text('Repayment Report', 14, 15);
+        doc.setFontSize(10).text('Generated on: ' + new Date().toLocaleDateString(), 14, 25);
+
+        const table = document.getElementById(tableId);
+        const headers = [], data = [];
+
+        table.querySelectorAll('thead th').forEach(th => headers.push(th.textContent.trim()));
+        table.querySelectorAll('tbody tr').forEach(tr => {
+            if (tr.style.display !== 'none') {
+                const row = [];
+                tr.querySelectorAll('td').forEach(td => row.push(td.textContent.trim()));
+                data.push(row);
+            }
+        });
+
+        doc.autoTable({
+            head: [headers],
+            body: data,
+            startY: 35,
+            styles: { fontSize: 8, cellPadding: 2 },
+            headStyles: { fillColor: [44, 62, 80], textColor: 255 }
+        });
+
+        const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+        doc.save(`${filename}_${timestamp}.pdf`);
+    }
+</script>
