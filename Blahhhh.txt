@@ -1,93 +1,92 @@
 <script>
     $(document).ready(function () {
-        setTimeout(repayment_initializePagination, 100);
+        setTimeout(outstanding_initializePagination, 100);
 
         $("#btnExport").click(function () {
-            repayment_exportToPDF('repaymentReportTable', 'Repayment_Report');
+            outstanding_exportToPDF('outstandingReportTable', 'Outstanding_Loans_Report');
         });
+
+        document.getElementById('productFilter')?.addEventListener('change', outstanding_applyFilters);
     });
 
-    // Unique variable namespace to avoid collision
-    let repayment_currentPage = 1;
-    let repayment_rowsPerPage = 10;
-    let repayment_allRows = [];
-    let repayment_filteredRows = [];
+    // Unique variable names for this report
+    let outstanding_currentPage = 1;
+    let outstanding_rowsPerPage = 10;
+    let outstanding_allRows = [];
+    let outstanding_filteredRows = [];
 
-    function repayment_initializePagination() {
-        repayment_allRows = Array.from(document.querySelectorAll('#repaymentReportTable .report-row'));
-        repayment_filteredRows = [...repayment_allRows];
-        repayment_updateTable();
-        document.getElementById('statusFilter')?.addEventListener('change', repayment_applyFilters);
-        document.getElementById('productFilter')?.addEventListener('change', repayment_applyFilters);
+    function outstanding_initializePagination() {
+        outstanding_allRows = Array.from(document.querySelectorAll('#outstandingReportTable .report-row'));
+        outstanding_filteredRows = [...outstanding_allRows];
+        outstanding_updateTable();
     }
 
-    function repayment_applyFilters() {
-        const statusFilter = document.getElementById('statusFilter')?.value.toLowerCase();
+    function outstanding_applyFilters() {
+        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase();
         const productFilter = document.getElementById('productFilter')?.value.toLowerCase();
 
-        repayment_filteredRows = repayment_allRows.filter(row => {
+        outstanding_filteredRows = outstanding_allRows.filter(row => {
             const cells = row.getElementsByTagName('td');
             if (cells.length === 0) return false;
 
-            const isAdmin = cells.length === 10;
-            const productTypeIndex = isAdmin ? 4 : 2;
-            const statusIndex = isAdmin ? 9 : 7;
-
+            const isAdmin = cells.length === 8;
+            const productTypeIndex = isAdmin ? 3 : 1;
+            const rowText = row.textContent.toLowerCase();
             const productTypeText = cells[productTypeIndex]?.textContent.trim().toLowerCase() || '';
-            const statusText = cells[statusIndex]?.textContent.trim().toLowerCase() || '';
 
-            const matchesStatus = !statusFilter || statusText.includes(statusFilter);
+            const matchesSearch = !searchTerm || rowText.includes(searchTerm);
             const matchesProduct = !productFilter || productTypeText.includes(productFilter);
 
-            return matchesStatus && matchesProduct;
+            return matchesSearch && matchesProduct;
         });
 
-        repayment_currentPage = 1;
-        repayment_updateTable();
+        outstanding_currentPage = 1;
+        outstanding_updateTable();
     }
 
-    function repayment_updateTable() {
-        repayment_allRows.forEach(row => row.style.display = 'none');
+    function outstanding_updateTable() {
+        outstanding_allRows.forEach(row => row.style.display = 'none');
 
-        const totalRows = repayment_filteredRows.length;
-        const totalPages = Math.ceil(totalRows / repayment_rowsPerPage) || 1;
-        const startIndex = (repayment_currentPage - 1) * repayment_rowsPerPage;
-        const endIndex = Math.min(startIndex + repayment_rowsPerPage, totalRows);
+        const totalRows = outstanding_filteredRows.length;
+        const totalPages = Math.ceil(totalRows / outstanding_rowsPerPage) || 1;
+        const startIndex = (outstanding_currentPage - 1) * outstanding_rowsPerPage;
+        const endIndex = Math.min(startIndex + outstanding_rowsPerPage, totalRows);
 
         for (let i = startIndex; i < endIndex; i++) {
-            if (repayment_filteredRows[i]) {
-                repayment_filteredRows[i].style.display = '';
+            if (outstanding_filteredRows[i]) {
+                outstanding_filteredRows[i].style.display = '';
             }
         }
 
-        repayment_updatePagination(totalPages, totalRows, startIndex, endIndex);
+        outstanding_updatePagination(totalPages, totalRows, startIndex, endIndex);
     }
 
-    function repayment_updatePagination(totalPages, totalRows, startIndex, endIndex) {
-        const paginationContainer = document.getElementById('repaymentPaginationContainer');
-        const paginationInfo = document.getElementById('repaymentPaginationInfo');
+    function outstanding_updatePagination(totalPages, totalRows, startIndex, endIndex) {
+        const paginationContainer = document.getElementById('outstandingPaginationContainer');
+        const paginationInfo = document.getElementById('outstandingPaginationInfo');
+
         paginationContainer.innerHTML = '';
 
         if (totalPages <= 1) {
-            const singleBtn = repayment_createPaginationButton('1', 1, false, true);
-            paginationContainer.appendChild(singleBtn);
+            paginationContainer.appendChild(outstanding_createPaginationButton('1', 1, false, true));
         } else {
-            paginationContainer.appendChild(repayment_createPaginationButton('«', 1, repayment_currentPage === 1));
-            paginationContainer.appendChild(repayment_createPaginationButton('‹', repayment_currentPage - 1, repayment_currentPage === 1));
+            paginationContainer.appendChild(outstanding_createPaginationButton('«', 1, outstanding_currentPage === 1));
+            paginationContainer.appendChild(outstanding_createPaginationButton('‹', outstanding_currentPage - 1, outstanding_currentPage === 1));
 
             const maxVisiblePages = 5;
-            let startPage = Math.max(1, repayment_currentPage - Math.floor(maxVisiblePages / 2));
+            let startPage = Math.max(1, outstanding_currentPage - Math.floor(maxVisiblePages / 2));
             let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
             if (endPage - startPage + 1 < maxVisiblePages) {
                 startPage = Math.max(1, endPage - maxVisiblePages + 1);
             }
 
             for (let i = startPage; i <= endPage; i++) {
-                paginationContainer.appendChild(repayment_createPaginationButton(i, i, false, i === repayment_currentPage));
+                paginationContainer.appendChild(outstanding_createPaginationButton(i, i, false, i === outstanding_currentPage));
             }
 
-            paginationContainer.appendChild(repayment_createPaginationButton('›', repayment_currentPage + 1, repayment_currentPage === totalPages));
-            paginationContainer.appendChild(repayment_createPaginationButton('»', totalPages, repayment_currentPage === totalPages));
+            paginationContainer.appendChild(outstanding_createPaginationButton('›', outstanding_currentPage + 1, outstanding_currentPage === totalPages));
+            paginationContainer.appendChild(outstanding_createPaginationButton('»', totalPages, outstanding_currentPage === totalPages));
         }
 
         paginationInfo.innerHTML = totalRows > 0
@@ -95,7 +94,7 @@
             : `<i class="fas fa-info-circle"></i> No matching records found`;
     }
 
-    function repayment_createPaginationButton(text, page, disabled, active = false) {
+    function outstanding_createPaginationButton(text, page, disabled, active = false) {
         const li = document.createElement('li');
         li.className = `page-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
 
@@ -107,7 +106,7 @@
         if (!disabled) {
             button.onclick = (e) => {
                 e.preventDefault();
-                repayment_goToPage(page);
+                outstanding_goToPage(page);
             };
         }
 
@@ -115,23 +114,24 @@
         return li;
     }
 
-    function repayment_goToPage(page) {
-        repayment_currentPage = page;
-        repayment_updateTable();
+    function outstanding_goToPage(page) {
+        outstanding_currentPage = page;
+        outstanding_updateTable();
     }
 
-    function repayment_exportToPDF(tableId, filename) {
+    function outstanding_exportToPDF(tableId, filename) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
         doc.setFontSize(16);
-        doc.text('Repayment Report', 14, 15);
+        doc.text('Outstanding Loans Report', 14, 15);
 
         doc.setFontSize(10);
         doc.text('Generated on: ' + new Date().toLocaleDateString(), 14, 25);
 
         const table = document.getElementById(tableId);
-        const headers = [], data = [];
+        const headers = [];
+        const data = [];
 
         table.querySelectorAll('thead th').forEach(th => headers.push(th.textContent.trim()));
         table.querySelectorAll('tbody tr').forEach(tr => {
